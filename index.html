@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEM Sample Size Calculator</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f0f2f5;
+    color: #222;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: linear-gradient(135deg, #1a3a5c 0%, #2e6da4 100%);
+    color: white;
+    padding: 22px 32px 18px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+  }
+  .header h1 { font-size: 1.55rem; font-weight: 700; letter-spacing: .3px; }
+  .header p  { font-size: .85rem; opacity: .85; margin-top: 4px; }
+
+  /* ── Layout ── */
+  .layout {
+    display: flex;
+    min-height: calc(100vh - 90px);
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 230px;
+    min-width: 230px;
+    background: #1a3a5c;
+    padding: 20px 0;
+  }
+  .sidebar-title {
+    color: #aac8e8;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 0 18px 10px;
+  }
+  .nav-btn {
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
+    color: #cce0f5;
+    text-align: left;
+    padding: 11px 18px;
+    font-size: .88rem;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all .15s;
+  }
+  .nav-btn:hover   { background: rgba(255,255,255,.08); color: #fff; }
+  .nav-btn.active  { background: rgba(255,255,255,.13); color: #fff;
+                     border-left-color: #5ba3e0; font-weight: 600; }
+  .nav-section {
+    color: #6a90b0;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    padding: 18px 18px 6px;
+  }
+
+  /* ── Main ── */
+  .main {
+    flex: 1;
+    padding: 28px 32px;
+    overflow-y: auto;
+  }
+
+  /* ── Panel ── */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .panel-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1a3a5c;
+    margin-bottom: 4px;
+  }
+  .panel-subtitle {
+    font-size: .83rem;
+    color: #666;
+    margin-bottom: 22px;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.09);
+    padding: 24px 26px;
+    margin-bottom: 22px;
+  }
+  .card-title {
+    font-size: .95rem;
+    font-weight: 700;
+    color: #2e6da4;
+    border-bottom: 2px solid #e8f0f8;
+    padding-bottom: 10px;
+    margin-bottom: 18px;
+  }
+
+  /* ── Form grid ── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 24px;
+  }
+  .form-grid.single { grid-template-columns: 1fr; }
+  .form-grid.three  { grid-template-columns: 1fr 1fr 1fr; }
+
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group label {
+    font-size: .82rem;
+    font-weight: 600;
+    color: #333;
+  }
+  .form-group input[type=number],
+  .form-group input[type=text],
+  .form-group select {
+    border: 1px solid #ccd6e0;
+    border-radius: 5px;
+    padding: 8px 10px;
+    font-size: .88rem;
+    color: #222;
+    transition: border-color .15s;
+    background: #fafcfe;
+  }
+  .form-group input:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: #2e6da4;
+    background: #fff;
+  }
+  .form-hint { font-size: .75rem; color: #888; }
+
+  /* ── Buttons ── */
+  .btn-row { display: flex; gap: 10px; margin-top: 20px; }
+  .btn {
+    padding: 9px 22px;
+    border-radius: 5px;
+    border: none;
+    font-size: .88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .btn-primary { background: #2e6da4; color: #fff; }
+  .btn-primary:hover { background: #1a5a91; }
+  .btn-reset   { background: #e8edf2; color: #444; }
+  .btn-reset:hover { background: #d5dde6; }
+
+  /* ── Results ── */
+  .result-box {
+    background: linear-gradient(135deg, #eaf3fb 0%, #f0f7ff 100%);
+    border: 1px solid #b8d4ec;
+    border-radius: 8px;
+    padding: 20px 22px;
+    margin-top: 22px;
+  }
+  .result-box h3 {
+    font-size: .9rem;
+    color: #1a3a5c;
+    margin-bottom: 14px;
+    font-weight: 700;
+  }
+  .result-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+  }
+  .result-item {
+    background: #fff;
+    border-radius: 6px;
+    padding: 12px 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    text-align: center;
+  }
+  .result-item .label {
+    font-size: .72rem;
+    color: #666;
+    margin-bottom: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+  }
+  .result-item .value {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #1a5a91;
+  }
+  .result-item.highlight .value { color: #c0392b; font-size: 2rem; }
+
+  .error-box {
+    background: #fff0f0;
+    border: 1px solid #f5a0a0;
+    border-radius: 6px;
+    padding: 12px 16px;
+    color: #c0392b;
+    font-size: .85rem;
+    margin-top: 18px;
+    display: none;
+  }
+
+  /* ── Info box ── */
+  .info-box {
+    background: #fffbe6;
+    border-left: 4px solid #f0c040;
+    border-radius: 4px;
+    padding: 12px 16px;
+    font-size: .82rem;
+    color: #5a4a00;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  /* ── Formula box ── */
+  .formula-box {
+    background: #f4f8fb;
+    border: 1px solid #d0e4f0;
+    border-radius: 6px;
+    padding: 14px 18px;
+    font-family: 'Courier New', monospace;
+    font-size: .82rem;
+    color: #1a3a5c;
+    margin: 12px 0;
+    line-height: 1.8;
+  }
+
+  /* ── About panel ── */
+  .about-section { margin-bottom: 18px; }
+  .about-section h3 {
+    font-size: 1rem;
+    color: #1a3a5c;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+  .about-section p, .about-section li {
+    font-size: .87rem;
+    color: #444;
+    line-height: 1.65;
+    margin-bottom: 6px;
+  }
+  .about-section ul { padding-left: 20px; }
+  .badge {
+    display: inline-block;
+    background: #2e6da4;
+    color: #fff;
+    font-size: .72rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 6px;
+    font-weight: 600;
+  }
+
+  @media (max-width: 700px) {
+    .sidebar { width: 180px; min-width: 180px; }
+    .main    { padding: 18px 14px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid.three { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📐 SEM Sample Size Calculator</h1>
+  <p>Confirmatory Factor Analysis &amp; Structural Equation Modelling &nbsp;|&nbsp; Based on Kim (2005) formulas</p>
+</div>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-title">Modules</div>
+
+    <div class="nav-section">CFA</div>
+    <button class="nav-btn active" onclick="showPanel('cfa-rmsea')">CFA by RMSEA</button>
+    <button class="nav-btn"        onclick="showPanel('cfa-cfi-equal')">CFA by CFI (Equal)</button>
+    <button class="nav-btn"        onclick="showPanel('cfa-cfi-adv')">CFA by CFI (Advanced)</button>
+
+    <div class="nav-section">SEM</div>
+    <button class="nav-btn" onclick="showPanel('sem-rmsea')">SEM by RMSEA</button>
+    <button class="nav-btn" onclick="showPanel('sem-df')">Degrees of Freedom</button>
+
+    <div class="nav-section">Info</div>
+    <button class="nav-btn" onclick="showPanel('about')">About &amp; Formulas</button>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- ══════════════════════════════════════════
+         Panel 1 — CFA by RMSEA
+    ══════════════════════════════════════════ -->
+    <div id="panel-cfa-rmsea" class="panel active">
+      <div class="panel-title">CFA — Sample Size by RMSEA</div>
+      <div class="panel-subtitle">Calculate required sample size for Confirmatory Factor Analysis using the Root Mean Square Error of Approximation.</div>
+
+      <div class="card">
+        <div class="card-title">Input Parameters</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Expected RMSEA</label>
+            <input type="number" id="r1-rmsea" value="0.05" min="0.001" max="0.20" step="0.01">
+            <span class="form-hint">Typical cutoff: 0.05 (good fit), 0.08 (acceptable)</span>
+          </div>
+          <div class="form-group">
+            <label>Number of Items (p)</label>
+            <input type="number" id="r1-items" value="12" min="3" max="200" step="1">
+          </div>
+          <div class="form-group">
+            <label>Number of Factors</label>
+            <input type="number" id="r1-factors" value="2" min="1" max="20" step="1">
+          </div>
+          <div class="form-group">
+            <label>Significance Level (α)</label>
+            <select id="r1-alpha">
+              <option value="0.05" selected>0.05 (Two-tailed)</option>
+              <option value="0.025">0.025 (One-tailed)</option>
+              <option value="0.01">0.01</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Statistical Power (1 − β) %</label>
+            <input type="number" id="r1-power" value="80" min="50" max="99" step="5">
+            <span class="form-hint">Typical: 80% or 90%</span>
+          </div>
+          <div class="form-group">
+            <label>Expected Dropout Rate %</label>
+            <input type="number" id="r1-dropout" value="10" min="0" max="50" step="5">
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="calcCfaRmsea()">Calculate</button>
+          <button class="btn btn-reset"   onclick="resetPanel('cfa-rmsea')">Reset</button>
+        </div>
+      </div>
+
+      <div class="error-box" id="r1-error"></div>
+      <div class="result-box" id="r1-result" style="display:none">
+        <h3>📊 Results</h3>
+        <div class="result-grid">
+          <div class="result-item"><div class="label">Degrees of Freedom</div><div class="value" id="r1-df">—</div></div>
+          <div class="result-item"><div class="label">Sample Size (n)</div><div class="value" id="r1-n">—</div></div>
+          <div class="result-item highlight"><div class="label">Sample Size with Dropout (n_drop)</div><div class="value" id="r1-ndrop">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         Panel 2 — CFA by CFI (Equal)
+    ══════════════════════════════════════════ -->
+    <div id="panel-cfa-cfi-equal" class="panel">
+      <div class="panel-title">CFA — Sample Size by CFI (Equal Items per Factor)</div>
+      <div class="panel-subtitle">Use when each factor has the same number of items.</div>
+
+      <div class="info-box">⚠️ This module requires the number of items to be exactly divisible by the number of factors (equal items per factor). Use the <strong>Advanced</strong> module for unequal distributions.</div>
+
+      <div class="card">
+        <div class="card-title">Input Parameters</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Expected CFI</label>
+            <input type="number" id="c1-cfi" value="0.95" min="0.50" max="1.00" step="0.01">
+            <span class="form-hint">Typical cutoff: ≥ 0.95 (good fit)</span>
+          </div>
+          <div class="form-group">
+            <label>Number of Items (p)</label>
+            <input type="number" id="c1-items" value="12" min="2" max="200" step="1">
+            <span class="form-hint">Must be a multiple of number of factors</span>
+          </div>
+          <div class="form-group">
+            <label>Number of Factors</label>
+            <input type="number" id="c1-factors" value="2" min="1" max="20" step="1">
+          </div>
+          <div class="form-group">
+            <label>Average Factor Loading</label>
+            <input type="number" id="c1-fl" value="0.70" min="0.10" max="0.99" step="0.05">
+            <span class="form-hint">Typical range: 0.5 – 0.9</span>
+          </div>
+          <div class="form-group">
+            <label>Average Factor Correlation</label>
+            <input type="number" id="c1-fcor" value="0.30" min="0.00" max="0.99" step="0.05">
+          </div>
+          <div class="form-group">
+            <label>Significance Level (α)</label>
+            <select id="c1-alpha">
+              <option value="0.05" selected>0.05 (Two-tailed)</option>
+              <option value="0.025">0.025 (One-tailed)</option>
+              <option value="0.01">0.01</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Statistical Power (1 − β) %</label>
+            <input type="number" id="c1-power" value="80" min="50" max="99" step="5">
+          </div>
+          <div class="form-group">
+            <label>Expected Dropout Rate %</label>
+            <input type="number" id="c1-dropout" value="10" min="0" max="50" step="5">
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="calcCfaCfiEqual()">Calculate</button>
+          <button class="btn btn-reset"   onclick="resetPanel('cfa-cfi-equal')">Reset</button>
+        </div>
+      </div>
+
+      <div class="error-box" id="c1-error"></div>
+      <div class="result-box" id="c1-result" style="display:none">
+        <h3>📊 Results</h3>
+        <div class="result-grid">
+          <div class="result-item"><div class="label">df (Model)</div><div class="value" id="c1-dfm">—</div></div>
+          <div class="result-item"><div class="label">df (Baseline)</div><div class="value" id="c1-dfb">—</div></div>
+          <div class="result-item"><div class="label">Sample Size (n)</div><div class="value" id="c1-n">—</div></div>
+          <div class="result-item highlight"><div class="label">Sample Size with Dropout</div><div class="value" id="c1-ndrop">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         Panel 3 — CFA by CFI (Advanced)
+    ══════════════════════════════════════════ -->
+    <div id="panel-cfa-cfi-adv" class="panel">
+      <div class="panel-title">CFA — Sample Size by CFI (Advanced / Unequal Items)</div>
+      <div class="panel-subtitle">Supports equal OR unequal number of items per factor.</div>
+
+      <div class="card">
+        <div class="card-title">Input Parameters</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Expected CFI</label>
+            <input type="number" id="a1-cfi" value="0.95" min="0.50" max="1.00" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Items per Factor (comma-separated)</label>
+            <input type="text" id="a1-items" value="8,4,6" placeholder="e.g. 8,4,6">
+            <span class="form-hint">e.g. "8,4,6" = Factor1 has 8, Factor2 has 4, Factor3 has 6 items</span>
+          </div>
+          <div class="form-group">
+            <label>Average Factor Loading</label>
+            <input type="number" id="a1-fl" value="0.70" min="0.10" max="0.99" step="0.05">
+          </div>
+          <div class="form-group">
+            <label>Average Factor Correlation</label>
+            <input type="number" id="a1-fcor" value="0.30" min="0.00" max="0.99" step="0.05">
+          </div>
+          <div class="form-group">
+            <label>Significance Level (α)</label>
+            <select id="a1-alpha">
+              <option value="0.05" selected>0.05 (Two-tailed)</option>
+              <option value="0.025">0.025 (One-tailed)</option>
+              <option value="0.01">0.01</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Statistical Power (1 − β) %</label>
+            <input type="number" id="a1-power" value="80" min="50" max="99" step="5">
+          </div>
+          <div class="form-group">
+            <label>Expected Dropout Rate %</label>
+            <input type="number" id="a1-dropout" value="10" min="0" max="50" step="5">
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="calcCfaCfiAdv()">Calculate</button>
+          <button class="btn btn-reset"   onclick="resetPanel('cfa-cfi-adv')">Reset</button>
+        </div>
+      </div>
+
+      <div class="error-box" id="a1-error"></div>
+      <div class="result-box" id="a1-result" style="display:none">
+        <h3>📊 Results</h3>
+        <div class="result-grid">
+          <div class="result-item"><div class="label">Total Items</div><div class="value" id="a1-totalitems">—</div></div>
+          <div class="result-item"><div class="label">df (Model)</div><div class="value" id="a1-dfm">—</div></div>
+          <div class="result-item"><div class="label">df (Baseline)</div><div class="value" id="a1-dfb">—</div></div>
+          <div class="result-item"><div class="label">Sample Size (n)</div><div class="value" id="a1-n">—</div></div>
+          <div class="result-item highlight"><div class="label">Sample Size with Dropout</div><div class="value" id="a1-ndrop">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         Panel 4 — SEM by RMSEA
+    ══════════════════════════════════════════ -->
+    <div id="panel-sem-rmsea" class="panel">
+      <div class="panel-title">SEM — Sample Size by RMSEA (General)</div>
+      <div class="panel-subtitle">Calculate sample size for any SEM model using the model's degrees of freedom. Use the Degrees of Freedom module if you don't know the df.</div>
+
+      <div class="card">
+        <div class="card-title">Input Parameters</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Expected RMSEA</label>
+            <input type="number" id="s1-rmsea" value="0.05" min="0.001" max="0.20" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Model Degrees of Freedom (df)</label>
+            <input type="number" id="s1-df" value="13" min="1" max="5000" step="1">
+            <span class="form-hint">Use the Degrees of Freedom module to calculate this</span>
+          </div>
+          <div class="form-group">
+            <label>Significance Level (α)</label>
+            <select id="s1-alpha">
+              <option value="0.05" selected>0.05 (Two-tailed)</option>
+              <option value="0.025">0.025 (One-tailed)</option>
+              <option value="0.01">0.01</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Statistical Power (1 − β) %</label>
+            <input type="number" id="s1-power" value="80" min="50" max="99" step="5">
+          </div>
+          <div class="form-group">
+            <label>Expected Dropout Rate %</label>
+            <input type="number" id="s1-dropout" value="10" min="0" max="50" step="5">
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="calcSemRmsea()">Calculate</button>
+          <button class="btn btn-reset"   onclick="resetPanel('sem-rmsea')">Reset</button>
+        </div>
+      </div>
+
+      <div class="error-box" id="s1-error"></div>
+      <div class="result-box" id="s1-result" style="display:none">
+        <h3>📊 Results</h3>
+        <div class="result-grid">
+          <div class="result-item"><div class="label">Sample Size (n)</div><div class="value" id="s1-n">—</div></div>
+          <div class="result-item highlight"><div class="label">Sample Size with Dropout</div><div class="value" id="s1-ndrop">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         Panel 5 — Degrees of Freedom
+    ══════════════════════════════════════════ -->
+    <div id="panel-sem-df" class="panel">
+      <div class="panel-title">Degrees of Freedom Calculator</div>
+      <div class="panel-subtitle">Calculate the model and baseline degrees of freedom for a CFA/SEM model.</div>
+
+      <div class="card">
+        <div class="card-title">Input Parameters</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Number of Items (p)</label>
+            <input type="number" id="df1-items" value="7" min="2" max="200" step="1">
+          </div>
+          <div class="form-group">
+            <label>Number of Factors</label>
+            <input type="number" id="df1-factors" value="2" min="1" max="20" step="1">
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="calcDf()">Calculate</button>
+          <button class="btn btn-reset"   onclick="resetPanel('sem-df')">Reset</button>
+        </div>
+      </div>
+
+      <div class="error-box" id="df1-error"></div>
+      <div class="result-box" id="df1-result" style="display:none">
+        <h3>📊 Results</h3>
+        <div class="result-grid">
+          <div class="result-item highlight"><div class="label">df (Model)</div><div class="value" id="df1-dfm">—</div></div>
+          <div class="result-item"><div class="label">df (Baseline)</div><div class="value" id="df1-dfb">—</div></div>
+        </div>
+        <p style="font-size:.8rem;color:#555;margin-top:14px;">💡 Use the <strong>Model df</strong> value in the <em>SEM by RMSEA</em> module.</p>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         Panel 6 — About
+    ══════════════════════════════════════════ -->
+    <div id="panel-about" class="panel">
+      <div class="panel-title">About This Calculator</div>
+      <div class="panel-subtitle">Technical background, formulas, and references.</div>
+
+      <div class="card">
+        <div class="card-title">Overview</div>
+        <div class="about-section">
+          <p>This calculator implements the sample size determination methods for <strong>Confirmatory Factor Analysis (CFA)</strong> and <strong>Structural Equation Modelling (SEM)</strong> based on the formulas derived by Kim (2005), as described in:</p>
+          <p style="margin-top:10px;padding:10px 14px;background:#f4f8fb;border-left:3px solid #2e6da4;border-radius:4px;font-size:.84rem;">
+            Arifin WN. <em>A web-based sample size calculator for structural equation modelling.</em> Education in Medicine Journal. 2025;17(1):195–212.
+          </p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Core Formulas</div>
+        <div class="about-section">
+          <h3>Degrees of Freedom</h3>
+          <div class="formula-box">
+            df = a − b<br>
+            a = p(p + 1) / 2<br>
+            b = FL + VAR + COVAR + REG<br><br>
+            Baseline df: only item variances freely estimated
+          </div>
+
+          <h3>Non-Centrality Parameter (NCP)</h3>
+          <p>Computed iteratively given α, power, and df using the chi-squared distribution (Kim, 2005 algorithm).</p>
+
+          <h3>Sample Size by RMSEA</h3>
+          <div class="formula-box">N = (NCP / (RMSEA² × df)) + 1</div>
+
+          <h3>Model-Implied Correlation Matrix</h3>
+          <div class="formula-box">Σ = Λy · Ψ · Λyᵀ + Θε</div>
+          <p>Where Λy = factor loading matrix, Ψ = factor correlation matrix, Θε = diagonal unique variance matrix.</p>
+
+          <h3>Sample Size by CFI</h3>
+          <div class="formula-box">
+            F_B = −ln(det(Σ))<br>
+            N = (NCP + df_baseline × (1 − CFI)) / (F_B × (1 − CFI)) + 1
+          </div>
+
+          <h3>Dropout Adjustment</h3>
+          <div class="formula-box">n_drop = ceil(n / (1 − dropout_rate))</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Available Modules</div>
+        <div class="about-section">
+          <ul>
+            <li><strong>CFA by RMSEA</strong> — requires items, factors, RMSEA, α, power</li>
+            <li><strong>CFA by CFI (Equal)</strong> — requires equal items per factor, CFI, factor loading &amp; correlation</li>
+            <li><strong>CFA by CFI (Advanced)</strong> — handles unequal items per factor</li>
+            <li><strong>SEM by RMSEA (General)</strong> — requires model df directly</li>
+            <li><strong>Degrees of Freedom</strong> — utility to compute model/baseline df</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Key References</div>
+        <div class="about-section">
+          <ul>
+            <li>Kim KH. The relation among fit indexes, power, and sample size in SEM. <em>Struct Equ Modeling.</em> 2005;12(3):368–90.</li>
+            <li>Brown TA. <em>Confirmatory factor analysis for applied research.</em> 2nd ed. Guilford Press; 2015.</li>
+            <li>Kline R. <em>Principles and practice of structural equation modeling.</em> 4th ed. Guilford Press; 2016.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ════════════════════════════════════════
+     JavaScript — all calculations
+════════════════════════════════════════ -->
+<script>
+// ── Navigation ────────────────────────────────────────────
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+function resetPanel(id) {
+  const mapping = {
+    'cfa-rmsea':    { ids: ['r1-rmsea','r1-items','r1-factors','r1-power','r1-dropout'],
+                      vals: [0.05, 12, 2, 80, 10],
+                      res: 'r1-result', err: 'r1-error' },
+    'cfa-cfi-equal':{ ids: ['c1-cfi','c1-items','c1-factors','c1-fl','c1-fcor','c1-power','c1-dropout'],
+                      vals: [0.95, 12, 2, 0.70, 0.30, 80, 10],
+                      res: 'c1-result', err: 'c1-error' },
+    'cfa-cfi-adv':  { ids: ['a1-cfi','a1-items','a1-fl','a1-fcor','a1-power','a1-dropout'],
+                      vals: [0.95, '8,4,6', 0.70, 0.30, 80, 10],
+                      res: 'a1-result', err: 'a1-error' },
+    'sem-rmsea':    { ids: ['s1-rmsea','s1-df','s1-power','s1-dropout'],
+                      vals: [0.05, 13, 80, 10],
+                      res: 's1-result', err: 's1-error' },
+    'sem-df':       { ids: ['df1-items','df1-factors'],
+                      vals: [7, 2],
+                      res: 'df1-result', err: 'df1-error' }
+  };
+  const m = mapping[id]; if (!m) return;
+  m.ids.forEach((el,i) => { const e = document.getElementById(el); if(e) e.value = m.vals[i]; });
+  document.getElementById(m.res).style.display = 'none';
+  const er = document.getElementById(m.err);
+  er.style.display = 'none'; er.textContent = '';
+}
+
+// ── Statistical core ──────────────────────────────────────
+
+// Chi-squared CDF via regularised incomplete gamma (numerical)
+function gammaln(x) {
+  const c = [76.18009172947146,-86.50532032941677,24.01409824083091,
+             -1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];
+  let y = x, tmp = x + 5.5;
+  tmp -= (x + 0.5) * Math.log(tmp);
+  let ser = 1.000000000190015;
+  for (let j=0;j<6;j++) { ser += c[j] / ++y; }
+  return -tmp + Math.log(2.5066282746310005 * ser / x);
+}
+
+function gammainc_lower(a, x) {
+  // Series expansion for lower incomplete gamma / Gamma(a)
+  if (x < 0) return 0;
+  if (x === 0) return 0;
+  let sum = 1/a, term = 1/a;
+  for (let n=1; n<200; n++) {
+    term *= x/(a+n);
+    sum += term;
+    if (Math.abs(term) < 1e-10 * Math.abs(sum)) break;
+  }
+  return Math.exp(-x + a*Math.log(x) - gammaln(a)) * sum;
+}
+
+function chi2cdf(x, df) {
+  if (x <= 0) return 0;
+  return gammainc_lower(df/2, x/2);
+}
+
+// Non-central chi-squared CDF (series expansion)
+function ncchi2cdf(x, df, ncp) {
+  if (x <= 0) return 0;
+  if (ncp === 0) return chi2cdf(x, df);
+  // Poisson-weighted sum of central chi2 cdfs
+  const maxTerms = 300;
+  const halfNcp = ncp / 2;
+  let logPoisson = -halfNcp;  // log(e^{-lambda} * lambda^0 / 0!)
+  let sum = 0;
+  for (let j = 0; j < maxTerms; j++) {
+    const w = Math.exp(logPoisson);
+    sum += w * chi2cdf(x, df + 2*j);
+    logPoisson += Math.log(halfNcp) - Math.log(j+1);
+    if (w < 1e-12) break;
+  }
+  return sum;
+}
+
+// NCP given alpha, power, df  (mirrors Kim 2005 / ncp_calc in R script)
+function ncpCalc(alpha, power, df) {
+  const crit  = chi2inv(1 - alpha, df);
+  let delta   = Math.round(crit - df);
+  let times   = 1, direc = 1, amount = 10;
+  while (times < 9) {
+    delta += direc * amount;
+    const pow = 1 - ncchi2cdf(crit, df, delta);
+    if (direc * (power - pow) < 0) {
+      times++; direc = -1 * direc; amount /= 10;
+    }
+  }
+  return delta;
+}
+
+// Chi-squared quantile (inverse CDF) via bisection
+function chi2inv(p, df) {
+  if (p <= 0) return 0;
+  if (p >= 1) return Infinity;
+  let lo = 0, hi = df + 10*Math.sqrt(2*df);
+  while (chi2cdf(hi, df) < p) hi *= 2;
+  for (let i=0; i<200; i++) {
+    const mid = (lo+hi)/2;
+    if (chi2cdf(mid,df) < p) lo=mid; else hi=mid;
+    if (hi-lo < 1e-8) break;
+  }
+  return (lo+hi)/2;
+}
+
+// Model df
+function dfModel(nItem, nFactor) {
+  const nCor = nFactor*(nFactor-1)/2;
+  const b_full = nItem*(nItem+1)/2;
+  const a_free = (nItem - nFactor) + nItem + nFactor + nCor;
+  return b_full - a_free;
+}
+
+// Baseline df
+function dfBaseline(nItem) {
+  const b_full = nItem*(nItem+1)/2;
+  return b_full - nItem;   // only error variances free
+}
+
+// Correlation matrix — equal items per factor
+function cormatEqual(nItem, nFactor, fl, fcor) {
+  const nPerFactor = nItem / nFactor;
+  // Build Lambda_y  (nItem × nFactor)
+  const Ly = Array.from({length:nItem}, () => new Array(nFactor).fill(0));
+  for (let f=0; f<nFactor; f++)
+    for (let i=0; i<nPerFactor; i++)
+      Ly[f*nPerFactor + i][f] = fl;
+  return buildCormat(nItem, nFactor, Ly, fl, fcor);
+}
+
+// Correlation matrix — unequal items per factor
+function cormatUnequal(vecItem, fl, fcor) {
+  const nFactor = vecItem.length;
+  const nItem   = vecItem.reduce((a,b)=>a+b, 0);
+  const Ly = Array.from({length:nItem}, () => new Array(nFactor).fill(0));
+  let row = 0;
+  for (let f=0; f<nFactor; f++) {
+    for (let i=0; i<vecItem[f]; i++) { Ly[row][f] = fl; row++; }
+  }
+  return buildCormat(nItem, nFactor, Ly, fl, fcor);
+}
+
+function buildCormat(nItem, nFactor, Ly, fl, fcor) {
+  // Psi (factor correlation)
+  const Psi = Array.from({length:nFactor}, (_,i) =>
+    Array.from({length:nFactor}, (_,j) => i===j ? 1 : fcor));
+  // Theta_e (unique variance diagonal)
+  const uvar = 1 - fl*fl;
+  // Sigma = Ly * Psi * Ly^T + Theta_e
+  const Sigma = Array.from({length:nItem}, () => new Array(nItem).fill(0));
+  // LyPsi = Ly * Psi
+  const LyPsi = Array.from({length:nItem}, () => new Array(nFactor).fill(0));
+  for (let i=0; i<nItem; i++)
+    for (let k=0; k<nFactor; k++)
+      for (let j=0; j<nFactor; j++)
+        LyPsi[i][k] += Ly[i][j] * Psi[j][k];
+  // LyPsi * Ly^T
+  for (let i=0; i<nItem; i++)
+    for (let j=0; j<nItem; j++) {
+      let s = 0;
+      for (let k=0; k<nFactor; k++) s += LyPsi[i][k] * Ly[j][k];
+      Sigma[i][j] = s + (i===j ? uvar : 0);
+    }
+  return Sigma;
+}
+
+// Matrix determinant (LU decomposition)
+function matDet(M) {
+  const n = M.length;
+  const A = M.map(r => [...r]);
+  let det = 1;
+  for (let col=0; col<n; col++) {
+    // partial pivoting
+    let maxRow = col;
+    for (let row=col+1; row<n; row++)
+      if (Math.abs(A[row][col]) > Math.abs(A[maxRow][col])) maxRow=row;
+    if (maxRow !== col) { [A[col], A[maxRow]] = [A[maxRow], A[col]]; det *= -1; }
+    if (Math.abs(A[col][col]) < 1e-12) return 0;
+    det *= A[col][col];
+    for (let row=col+1; row<n; row++) {
+      const f = A[row][col] / A[col][col];
+      for (let k=col; k<n; k++) A[row][k] -= f * A[col][k];
+    }
+  }
+  return det;
+}
+
+// Sample size by RMSEA
+function nRmseaCalc(rmsea, alpha, power, df) {
+  const ncp = ncpCalc(alpha, power, df);
+  return (ncp / (rmsea*rmsea * df)) + 1;
+}
+
+// Sample size by CFI
+function nCfiCalc(cfi, alpha, power, df, dfb, cormat) {
+  const ncp  = ncpCalc(alpha, power, df);
+  const det  = matDet(cormat);
+  const F_B  = -Math.log(det);
+  return (ncp + dfb*(1-cfi)) / (F_B*(1-cfi)) + 1;
+}
+
+// Dropout adjustment
+function applyDropout(n, dropPct) {
+  return Math.ceil(n / (1 - dropPct/100));
+}
+
+// ── Display helpers ───────────────────────────────────────
+function showError(id, msg) {
+  const e = document.getElementById(id);
+  e.textContent = '⚠️ ' + msg;
+  e.style.display = 'block';
+}
+function hideError(id) {
+  const e = document.getElementById(id);
+  e.style.display = 'none';
+  e.textContent = '';
+}
+function setVal(id, v) {
+  document.getElementById(id).textContent = typeof v === 'number' ? Math.round(v) : v;
+}
+
+// ── Module calculations ───────────────────────────────────
+
+function calcCfaRmsea() {
+  hideError('r1-error');
+  const rmsea   = +document.getElementById('r1-rmsea').value;
+  const nItem   = +document.getElementById('r1-items').value;
+  const nFactor = +document.getElementById('r1-factors').value;
+  const alpha   = +document.getElementById('r1-alpha').value;
+  const power   = +document.getElementById('r1-power').value / 100;
+  const dropout = +document.getElementById('r1-dropout').value;
+
+  if (nItem < nFactor*2) return showError('r1-error','Items must be at least 2× the number of factors.');
+  if (rmsea <= 0)        return showError('r1-error','RMSEA must be greater than 0.');
+
+  const df   = dfModel(nItem, nFactor);
+  if (df < 1) return showError('r1-error','Model is just-identified (df = 0). Add more items or reduce factors.');
+  const n    = nRmseaCalc(rmsea, alpha, power, df);
+  const ndrop= applyDropout(n, dropout);
+
+  setVal('r1-df', df);
+  setVal('r1-n',  n);
+  setVal('r1-ndrop', ndrop);
+  document.getElementById('r1-result').style.display = 'block';
+}
+
+function calcCfaCfiEqual() {
+  hideError('c1-error');
+  const cfi     = +document.getElementById('c1-cfi').value;
+  const nItem   = +document.getElementById('c1-items').value;
+  const nFactor = +document.getElementById('c1-factors').value;
+  const fl      = +document.getElementById('c1-fl').value;
+  const fcor    = +document.getElementById('c1-fcor').value;
+  const alpha   = +document.getElementById('c1-alpha').value;
+  const power   = +document.getElementById('c1-power').value / 100;
+  const dropout = +document.getElementById('c1-dropout').value;
+
+  if (nItem % nFactor !== 0) return showError('c1-error','Number of items must be a multiple of number of factors. Use the Advanced module for unequal items.');
+
+  const df    = dfModel(nItem, nFactor);
+  const dfb   = dfBaseline(nItem);
+  if (df < 1) return showError('c1-error','Model is just-identified (df = 0). Increase items or reduce factors.');
+
+  const cormat = cormatEqual(nItem, nFactor, fl, fcor);
+  const n      = nCfiCalc(cfi, alpha, power, df, dfb, cormat);
+  const ndrop  = applyDropout(n, dropout);
+
+  setVal('c1-dfm',   df);
+  setVal('c1-dfb',   dfb);
+  setVal('c1-n',     n);
+  setVal('c1-ndrop', ndrop);
+  document.getElementById('c1-result').style.display = 'block';
+}
+
+function calcCfaCfiAdv() {
+  hideError('a1-error');
+  const cfi    = +document.getElementById('a1-cfi').value;
+  const raw    = document.getElementById('a1-items').value;
+  const fl     = +document.getElementById('a1-fl').value;
+  const fcor   = +document.getElementById('a1-fcor').value;
+  const alpha  = +document.getElementById('a1-alpha').value;
+  const power  = +document.getElementById('a1-power').value / 100;
+  const dropout= +document.getElementById('a1-dropout').value;
+
+  const vecItem = raw.split(',').map(s => parseInt(s.trim(), 10));
+  if (vecItem.some(isNaN) || vecItem.some(v=>v<1))
+    return showError('a1-error','Please enter valid positive integers separated by commas.');
+
+  const nFactor = vecItem.length;
+  const nItem   = vecItem.reduce((a,b)=>a+b,0);
+
+  const df    = dfModel(nItem, nFactor);
+  const dfb   = dfBaseline(nItem);
+  if (df < 1) return showError('a1-error','Model is just-identified (df = 0). Add more items or reduce factors.');
+
+  const cormat = cormatUnequal(vecItem, fl, fcor);
+  const n      = nCfiCalc(cfi, alpha, power, df, dfb, cormat);
+  const ndrop  = applyDropout(n, dropout);
+
+  setVal('a1-totalitems', nItem);
+  setVal('a1-dfm',   df);
+  setVal('a1-dfb',   dfb);
+  setVal('a1-n',     n);
+  setVal('a1-ndrop', ndrop);
+  document.getElementById('a1-result').style.display = 'block';
+}
+
+function calcSemRmsea() {
+  hideError('s1-error');
+  const rmsea  = +document.getElementById('s1-rmsea').value;
+  const df     = +document.getElementById('s1-df').value;
+  const alpha  = +document.getElementById('s1-alpha').value;
+  const power  = +document.getElementById('s1-power').value / 100;
+  const dropout= +document.getElementById('s1-dropout').value;
+
+  if (df < 1)   return showError('s1-error','Degrees of freedom must be at least 1.');
+  if (rmsea<=0) return showError('s1-error','RMSEA must be greater than 0.');
+
+  const n     = nRmseaCalc(rmsea, alpha, power, df);
+  const ndrop = applyDropout(n, dropout);
+
+  setVal('s1-n',     n);
+  setVal('s1-ndrop', ndrop);
+  document.getElementById('s1-result').style.display = 'block';
+}
+
+function calcDf() {
+  hideError('df1-error');
+  const nItem   = +document.getElementById('df1-items').value;
+  const nFactor = +document.getElementById('df1-factors').value;
+
+  if (nItem < nFactor) return showError('df1-error','Items must be ≥ number of factors.');
+
+  const df  = dfModel(nItem, nFactor);
+  const dfb = dfBaseline(nItem);
+
+  setVal('df1-dfm', df);
+  setVal('df1-dfb', dfb);
+  document.getElementById('df1-result').style.display = 'block';
+}
+</script>
+</body>
+</html>
